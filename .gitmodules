@@ -1,0 +1,3 @@
+[submodule "lib/bqn-curl"]
+	path = lib/bqn-curl
+	url = https://github.com/dlozeve/bqn-curl.git
