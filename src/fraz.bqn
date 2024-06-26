@@ -27,7 +27,7 @@ args ← •args
 { 0=≠𝕩 ? •Out helpMsg ⋄ •Exit 0 ; @ }args # Display help message if no arguments provided
 cmd ← ⊑args
 cmdSet ← "init"‿"add"‿"remove"‿"search"‿"help" # Allowed commands
-{ +´cmd⊸≡¨cmdSet ? @ ; •Out badCmdError ⋄ •Exit ¯1 } # Fail if cmd is unknown
+{ ∊⟜cmdSet⌾<cmd ? @ ; •Out badCmdError ⋄ •Exit ¯1 } # Fail if cmd is unknown
 args 1⊸↓↩
 
 # Check if a directory is already a Frazzle
@@ -44,10 +44,7 @@ Add ← { •Show⌽𝕩 }
 Remove ← { •Show⌽¨𝕩 }
 Search ← { •Show∘‿1⥊𝕩 }
 Help ← {
-  { "help"≡⊑𝕩 ? •Out helpHelpMsg ⋄ •Exit 0 ; @ } # FIXME
-  { 0≠≠𝕩 ? •Out "Usage: fraz help" ⋄ •Exit ¯1 ; @ }
-  •Out helpMsg
-  𝕩
+  0=≠𝕩 ? •Out helpMsg ; "help"≡⊑𝕩 ? •Out helpHelpMsg ; •Out "Usage: fraz help" ⋄ •Exit ¯1 
 }
 
 # Run it!
