@@ -1,4 +1,5 @@
 ⟨ Get, Post ⟩ ← •Import "../lib/bqn-curl/curl.bqn"
+⟨ read ⟩ ← •Import "read.bqn"
 
 fraz ⇐ {
   r ← Get "https://httpbin.org/get"
@@ -38,11 +39,27 @@ cmd ← ⊑args
 (∊⟜cmdSet⌾<cmd) _Assert_ ("Allowed commands are: "∾{𝕨∾", "∾𝕩}´cmdSet) # Fail if cmd is unknown
 args 1⊸↓↩
 
-configHeaders ← ⟨"name","author","version","type","licence","dependencies"⟩
-# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), author (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of strings).
+configHeaders ← ⟨"name","description","author","version","type","licence","dependencies"⟩
+# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), author (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of strings).
 # TODO: Implement dependency versioning like in Python (e.g. "numpy==1.1.14")
+InputConfig ← {
+  •Out "Frazzle name:"
+  name ← read.LineNoBlank ""
+  •Out "Description:"
+  description ← read.LineNoBlank ""
+  •Out "Author:"
+  author ← read.LineNoBlank ""
+  •Out "Version number:"
+  version ← read.LineNoBlank ""
+  •Out "Frazzle type ('app' or 'lib'):"
+  type ← read.LineNoBlank ""
+  •Out "Licence:"
+  licence ← read.LineNoBlank ""
+  dependencies ← ""
+  ⟨name,description,author,version,type,licence,dependencies⟩
+}
 GenConfig ← {
-  "GenConfig requires a list of length 6."!6=≠𝕩
+  "GenConfig requires a list of length 7."!7=≠𝕩
   configHeaders •HashMap 𝕩
 }
 ReadConfig ← { 𝕩 }
