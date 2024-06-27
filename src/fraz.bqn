@@ -40,30 +40,31 @@ cmd ← ⊑args
 args 1⊸↓↩
 
 configHeaders ← ⟨"name","description","author","version","type","licence","dependencies"⟩
-# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), author (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of strings).
-# TODO: Implement dependency versioning like in Python (e.g. "numpy==1.1.14")
 InputConfig ← {
   •Out "Frazzle name:"
-  name ← read.LineNoBlank ""
+  name ← read.LineNoBlank 𝕩
   •Out "Description:"
-  description ← read.LineNoBlank ""
+  description ← read.LineNoBlank 𝕩
   •Out "Author:"
-  author ← read.LineNoBlank ""
+  author ← read.LineNoBlank 𝕩
   •Out "Version number:"
-  version ← read.LineNoBlank ""
+  version ← read.LineNoBlank 𝕩
   •Out "Frazzle type ('app' or 'lib'):"
-  type ← read.LineNoBlank ""
+  type ← {l←read.LineNoBlank 𝕩 ⋄ (l≡"app")∨(l≡"lib") ? l ; •Out "Frazzle type must be either 'app' or 'lib'." ⋄ 𝕊 𝕩} 𝕩
   •Out "Licence:"
-  licence ← read.LineNoBlank ""
-  dependencies ← ""
+  licence ← read.LineNoBlank 𝕩
+  dependencies ← ⟨⟩
   ⟨name,description,author,version,type,licence,dependencies⟩
 }
+# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), author (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of strings).
+# TODO: Implement dependency versioning like in Python (e.g. "numpy==1.1.14")
 GenConfig ← {
-  "GenConfig requires a list of length 7."!7=≠𝕩
+  n←≠configHeaders
+  ("GenConfig requires a list of length "∾(•Fmt n)∾".")!n=≠𝕩
   configHeaders •HashMap 𝕩
 }
 ReadConfig ← { 𝕩 }
-WriteConfig ← { 𝕩 •file.Chars helpMsg } # TODO: Replace placeholder
+WriteConfig ← { 𝕨 •file.Bytes 𝕩 } # TODO: input checking
 
 New ← {
   (1=≠𝕩) _Assert_ "Usage: fraz new <dir>"
@@ -71,7 +72,7 @@ New ← {
   (¬•file.Exists dir) _Assert_ ("Directory "∾dir∾" already exists.")
   •file.CreateDir dir
   frazFile ← dir •file.At ".frazzle"
-  WriteConfig frazFile # TODO: GenConfig + WriteConfig
+  frazFile WriteConfig GenConfig InputConfig ""
   •Out "New Frazzle created in "∾dir∾"."
 }
 Init ← {
