@@ -52,6 +52,7 @@ New ⇐ {
   frazFile WriteConfig GenConfig InputConfig ""
   •Out "New Frazzle created in "∾dir∾"."
 }
+
 Init ⇐ {
   (0=≠𝕩) err._Assert_ "fraz init does not accept arguments.  Did you mean 'fraz new <dir>'?"
   frazFile ← •wdpath •file.At ".frazzle"
@@ -59,13 +60,16 @@ Init ⇐ {
   WriteConfig frazFile
   •Out "Frazzle initialised in "∾•wdpath
 }
+
 Add ⇐ {
   (0≠≠𝕩) err._Assert_ msg.use.add
   {"-i"≡⊑𝕩 ? (2<≠𝕩) err._Assert_ msg.use.add ⋄ frazIndex ↩ 1⊑𝕩 ; @}𝕩
   •Out frazIndex
 }
+
 Remove ⇐ { •Show⌽¨𝕩 }
-Search ⇐ { # TODO: Make it able to search descriptions as well, once I've figured out how to store and provide them
+
+SearchFrazzle ← { # TODO: Make it able to search descriptions as well, once I've figured out how to store and provide them
   (0≠≠𝕩) err._Assert_ msg.use.search
   lf ← @+10 # Line feed character
   offset ← 0 # Where the search term is (in case -i is used)
@@ -77,14 +81,17 @@ Search ⇐ { # TODO: Make it able to search descriptions as well, once I've figu
   files {⊑⌽' ' str.Split 𝕩}¨↩
   frazzles ← ".frz" str.SearchList files
   results ← search str.SearchList ¯4↓¨frazzles
-  •Out¨ results
 }
+GetDescription ← { ⌽𝕩 } # TODO: Replace placeholder with curl query to dict://get.frazzl.es (250 is status OK for DICT, I think)
+Search ⇐ { •Out¨ GetDescription¨ SearchFrazzle 𝕩 }
+
 Help ⇐ {
   (2>≠𝕩) err._Assert_ msg.use.help
   { 0=≠𝕩 ? •Out msg.help.fraz ⋄ •Exit 0 ; @ }𝕩 # Display toplevel help message if no command provided
   (∊⟜cmdSet⌾<⊑𝕩) err._Assert_ ("Allowed commands are: "∾{𝕨∾", "∾𝕩}´cmdSet)
   •Out cmdHelpMap.Get ⊑𝕩 
 }
+
 cmdFnMap ← cmdSet •HashMap ⟨new,init,add,remove,search,help⟩ # Allowed commands with their corresponding functions
 
 # Run it!
