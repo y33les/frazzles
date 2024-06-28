@@ -24,8 +24,8 @@ You can also call 'fraz help <command> for more in-depth help with a specific co
 use ⇐ {
   new ⇐ "Usage: fraz new <dir>"
   init ⇐ "Usage: fraz init"
-  add ⇐ "Usage: fraz add [-i <Frazzle index URL] <frazzles>"
-  remove ⇐ "Usage: fraz remove <frazzles>"
+  add ⇐ "Usage: fraz add [-i <Frazzle index URL] <Frazzles>"
+  remove ⇐ "Usage: fraz remove <Frazzles>"
   search ⇐ "Usage: fraz search [-i <Frazzle index URL>] <search term>"
   help ⇐ "Usage: fraz help [command]"
 }

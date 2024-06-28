@@ -2,9 +2,11 @@ curl ← •Import "../lib/bqn-curl/curl.bqn"
 read ← •Import "read.bqn"
 err ← •Import "err.bqn"
 msg ← •Import "msg.bqn"
+str ← •Import "str.bqn"
 
 cmdSet ← ⟨"new","init","add","remove","search","help"⟩ # Allowed commands
 cmdHelpMap ← cmdSet •HashMap ⟨msg.help.new,msg.help.init,msg.help.add,msg.help.remove,msg.help.search,msg.help.help⟩ # Allowed commands with their corresponding help messages
+frazIndex ← "ftp://get.frazzl.es" # Default Frazzle index
 
 # Process arguments: fraz <cmd> <args>
 args ← •args
@@ -32,6 +34,7 @@ InputConfig ← {
 }
 # Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), author (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of strings).
 # TODO: Implement dependency versioning like in Python (e.g. "numpy==1.1.14")
+# TODO: Type checking
 GenConfig ⇐ {
   n←≠configHeaders
   ("GenConfig requires a list of length "∾(•Fmt n)∾".")!n=≠𝕩
@@ -56,13 +59,25 @@ Init ⇐ {
   WriteConfig frazFile
   •Out "Frazzle initialised in "∾•wdpath
 }
-Add ⇐ { •Show⌽𝕩 }
-Remove ⇐ { •Show⌽¨𝕩 }
-Search ⇐ {
-  frazIndex ← "ftp://ftp.frazzl.es"
-  (0≠≠𝕩) err._Assert_ msg.use.search
-  {"-i"≡⊑𝕩 ? msg.use.search!2=≠𝕩 ⋄ frazIndex ↩ 1⊑𝕩 ; msg.use.search!1=≠𝕩}𝕩
+Add ⇐ {
+  (0≠≠𝕩) err._Assert_ msg.use.add
+  {"-i"≡⊑𝕩 ? (2<≠𝕩) err._Assert_ msg.use.add ⋄ frazIndex ↩ 1⊑𝕩 ; @}𝕩
   •Out frazIndex
+}
+Remove ⇐ { •Show⌽¨𝕩 }
+Search ⇐ { # TODO: Make it able to search descriptions as well, once I've figured out how to store and provide them
+  (0≠≠𝕩) err._Assert_ msg.use.search
+  lf ← @+10 # Line feed character
+  offset ← 0 # Where the search term is (in case -i is used)
+  {"-i"≡⊑𝕩 ? (3=≠𝕩) err._Assert_ msg.use.search ⋄ frazIndex ↩ 1⊑𝕩 ⋄ offset↩2 ; (1=≠𝕩) err._Assert_ msg.use.search}𝕩
+  search ← offset⊑𝕩
+  response ← curl.Get frazIndex
+  (226=response.code) err._Assert_ ("Failed to fetch Frazzle index with code "∾(•Fmt response.code)∾".")
+  files ← lf str.Split response.content
+  files {⊑⌽' ' str.Split 𝕩}¨↩
+  frazzles ← ".frz" str.SearchList files
+  results ← search str.SearchList ¯4↓¨frazzles
+  •Out¨ results
 }
 Help ⇐ {
   (2>≠𝕩) err._Assert_ msg.use.help
