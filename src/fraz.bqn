@@ -32,7 +32,7 @@ InputConfig ← {
   dependencies ← ⟨⟩
   ⟨name,description,author,version,type,licence,dependencies⟩
 }
-# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), author (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of strings).
+# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), author (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of lists of strings (index, Frazzle)).
 # TODO: Implement dependency versioning like in Python (e.g. "numpy==1.1.14")
 # TODO: Type checking
 GenConfig ⇐ {
@@ -63,8 +63,23 @@ Init ⇐ {
 
 Add ⇐ {
   (0≠≠𝕩) err._Assert_ msg.use.add
-  {"-i"≡⊑𝕩 ? (2<≠𝕩) err._Assert_ msg.use.add ⋄ frazIndex ↩ 1⊑𝕩 ; @}𝕩
-  •Out frazIndex
+  (•file.Exists •wdpath •file.At ".frazzle") err._Assert_ "This command must be run from the root directory of a Frazzle."
+  offset ← 0
+  {"-i"≡⊑𝕩 ? (2<≠𝕩) err._Assert_ msg.use.search ⋄ frazIndex ↩ 1⊑𝕩 ⋄ offset↩2 ; (1=≠𝕩) err._Assert_ msg.use.search}𝕩
+  search ← offset↓𝕩
+  •Show search
+  Download ← {
+    response ← curl.Get url ← ∾´"ftp://"∾frazIndex∾"/"∾𝕩∾".frz" # TODO: add check to make sure no protocol:// header
+    •Show url
+    (226=response.code) err._Assert_ ("Failed to fetch Frazzle index with code "∾(•Fmt response.code)∾" ("∾url∾").") # 226 is FTP OK
+    libdir ← •wdpath •file.At "lib"
+    outfile ← libdir •file.At 𝕩
+    •Show outfile
+    outfile •file.Bytes response.content
+    •SH "tar"‿"xJf"‿outfile # TODO: A pure BQN (or even an •FFI) solution would be nicer here at some point
+    •file.Remove outfile
+  }
+  Download¨ search # TODO: test!!
 }
 
 Remove ⇐ { •Show⌽¨𝕩 }
@@ -101,5 +116,3 @@ cmdFnMap ← cmdSet •HashMap ⟨new,init,add,remove,search,help⟩ # Allowed c
 
 # Run it!
 args{𝕏𝕨}cmdFnMap.Get cmd
-
-# 4
