@@ -6,7 +6,7 @@ str ← •Import "str.bqn"
 
 cmdSet ← ⟨"new","init","add","remove","search","help"⟩ # Allowed commands
 cmdHelpMap ← cmdSet •HashMap ⟨msg.help.new,msg.help.init,msg.help.add,msg.help.remove,msg.help.search,msg.help.help⟩ # Allowed commands with their corresponding help messages
-frazIndex ← "ftp://get.frazzl.es" # Default Frazzle index
+frazIndex ← "get.frazzl.es" # Default Frazzle index
 
 # Process arguments: fraz <cmd> <args>
 args ← •args
@@ -71,19 +71,28 @@ Remove ⇐ { •Show⌽¨𝕩 }
 
 SearchFrazzle ← { # TODO: Make it able to search descriptions as well, once I've figured out how to store and provide them
   (0≠≠𝕩) err._Assert_ msg.use.search
-  lf ← @+10 # Line feed character
   offset ← 0 # Where the search term is (in case -i is used)
   {"-i"≡⊑𝕩 ? (3=≠𝕩) err._Assert_ msg.use.search ⋄ frazIndex ↩ 1⊑𝕩 ⋄ offset↩2 ; (1=≠𝕩) err._Assert_ msg.use.search}𝕩
   search ← offset⊑𝕩
-  response ← curl.Get frazIndex
+  response ← curl.Get "ftp://"∾frazIndex # TODO: add check to make sure no protocol:// header
   (226=response.code) err._Assert_ ("Failed to fetch Frazzle index with code "∾(•Fmt response.code)∾".")
-  files ← lf str.Split response.content
+  files ← str.lf str.Split response.content
   files {⊑⌽' ' str.Split 𝕩}¨↩
   frazzles ← ".frz" str.SearchList files
   results ← search str.SearchList ¯4↓¨frazzles
 }
-GetDescription ← { ⌽𝕩 } # TODO: Replace placeholder with curl query to dict://get.frazzl.es (250 is status OK for DICT, I think)
-Search ⇐ { •Out¨ GetDescription¨ SearchFrazzle 𝕩 }
+GetDescription ← {
+  (0≠≠𝕩) err._Assert_ msg.use.search
+  offset ← 0 # Where the search term is (in case -i is used)
+  {"-i"≡⊑𝕩 ? (3=≠𝕩) err._Assert_ msg.use.search ⋄ frazIndex ↩ 1⊑𝕩 ⋄ offset↩2 ; (1=≠𝕩) err._Assert_ msg.use.search}𝕩
+  search ← offset⊑𝕩
+  response ← curl.Get "dict://"∾frazIndex∾"/d:"∾search # TODO: add check to make sure no protocol:// header
+  response ↩ str.lf⊸str.Cut¨ str.cr str.Cut response.content
+  •Out (2⊑response)
+  # (250=response.code) err._Assert_ ("Failed to reach Frazzle dict with code "∾(•Fmt response.code)∾".")
+}
+#Search ⇐ { •Out¨ GetDescription¨ SearchFrazzle 𝕩 }
+Search ⇐ { •Show GetDescription 𝕩 }
 
 Help ⇐ {
   (2>≠𝕩) err._Assert_ msg.use.help
