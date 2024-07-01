@@ -75,7 +75,7 @@ SearchFrazzle ← { # TODO: Make it able to search descriptions as well, once I'
   {"-i"≡⊑𝕩 ? (3=≠𝕩) err._Assert_ msg.use.search ⋄ frazIndex ↩ 1⊑𝕩 ⋄ offset↩2 ; (1=≠𝕩) err._Assert_ msg.use.search}𝕩
   search ← offset⊑𝕩
   response ← curl.Get "ftp://"∾frazIndex # TODO: add check to make sure no protocol:// header
-  (226=response.code) err._Assert_ ("Failed to fetch Frazzle index with code "∾(•Fmt response.code)∾".")
+  (226=response.code) err._Assert_ ("Failed to fetch Frazzle index with code "∾(•Fmt response.code)∾".") # 226 is FTP OK
   files ← str.lf str.Split response.content
   files {⊑⌽' ' str.Split 𝕩}¨↩
   frazzles ← ".frz" str.SearchList files
@@ -83,13 +83,12 @@ SearchFrazzle ← { # TODO: Make it able to search descriptions as well, once I'
 }
 GetDescription ← {
   # TODO: input checks
-  response ← curl.Get "dict://"∾𝕨∾"/d:"∾𝕩 # TODO: add check to make sure no protocol:// header
+  response ← curl.Get ∾´"dict://"∾𝕨∾"/d:"∾𝕩 # TODO: add check to make sure no protocol:// header
   response ↩ str.lf⊸str.Cut¨ str.cr str.Cut response.content
-  (552≠str.ParseInt 3↑⊑2⊑response) err._Assert_ ("There is no Frazzle named '"∾𝕩∾"' at "∾𝕨∾".")
-  ⊑4⊑response
+  (552≠str.ParseInt 3↑⊑2⊑response) err._Assert_ (∾´"There is no Frazzle named '"∾𝕩∾"' at "∾𝕨∾".") # 552 is the DICT code for no entries found
+  result ← ⊑4⊑response
 }
-#Search ⇐ { •Out¨ GetDescription¨ SearchFrazzle 𝕩 }
-Search ⇐ { •Show frazIndex GetDescription 𝕩 }
+Search ⇐ { •Out¨ frazIndex⊸GetDescription¨ SearchFrazzle 𝕩 }
 
 Help ⇐ {
   (2>≠𝕩) err._Assert_ msg.use.help
@@ -102,3 +101,5 @@ cmdFnMap ← cmdSet •HashMap ⟨new,init,add,remove,search,help⟩ # Allowed c
 
 # Run it!
 args{𝕏𝕨}cmdFnMap.Get cmd
+
+# 4
