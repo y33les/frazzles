@@ -82,17 +82,14 @@ SearchFrazzle ← { # TODO: Make it able to search descriptions as well, once I'
   results ← search str.SearchList ¯4↓¨frazzles
 }
 GetDescription ← {
-  (0≠≠𝕩) err._Assert_ msg.use.search
-  offset ← 0 # Where the search term is (in case -i is used)
-  {"-i"≡⊑𝕩 ? (3=≠𝕩) err._Assert_ msg.use.search ⋄ frazIndex ↩ 1⊑𝕩 ⋄ offset↩2 ; (1=≠𝕩) err._Assert_ msg.use.search}𝕩
-  search ← offset⊑𝕩
-  response ← curl.Get "dict://"∾frazIndex∾"/d:"∾search # TODO: add check to make sure no protocol:// header
+  # TODO: input checks
+  response ← curl.Get "dict://"∾𝕨∾"/d:"∾𝕩 # TODO: add check to make sure no protocol:// header
   response ↩ str.lf⊸str.Cut¨ str.cr str.Cut response.content
-  •Out (2⊑response)
-  # (250=response.code) err._Assert_ ("Failed to reach Frazzle dict with code "∾(•Fmt response.code)∾".")
+  (552≠str.ParseInt 3↑⊑2⊑response) err._Assert_ ("There is no Frazzle named '"∾𝕩∾"' at "∾𝕨∾".")
+  ⊑4⊑response
 }
 #Search ⇐ { •Out¨ GetDescription¨ SearchFrazzle 𝕩 }
-Search ⇐ { •Show GetDescription 𝕩 }
+Search ⇐ { •Show frazIndex GetDescription 𝕩 }
 
 Help ⇐ {
   (2>≠𝕩) err._Assert_ msg.use.help
