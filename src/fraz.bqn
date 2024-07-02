@@ -15,24 +15,28 @@ cmd ← ⊑args
 (∊⟜cmdSet⌾<cmd) err._Assert_ ("Allowed commands are: "∾{𝕨∾", "∾𝕩}´cmdSet) # Fail if cmd is unknown
 args 1⊸↓↩
 
-configHeaders ← ⟨"name","description","author","version","type","licence","dependencies"⟩
+configHeaders ← ⟨"name","description","website","author","email","version","type","licence","dependencies"⟩
 InputConfig ← {
   •Out "Frazzle name:"
   name ← read.LineNoBlank 𝕩
   •Out "Description:"
   description ← read.LineNoBlank 𝕩
+  •Out "Project website:"
+  project ← read.LineNoBlank 𝕩
   •Out "Author:"
   author ← read.LineNoBlank 𝕩
+  •Out "Email address:"
+  email ← read.LineNoBlank 𝕩
   •Out "Version number:"
   version ← read.LineNoBlank 𝕩
   •Out "Frazzle type ('app' or 'lib'):"
   type ← {l←read.LineNoBlank 𝕩 ⋄ (l≡"app")∨(l≡"lib") ? l ; •Out "Frazzle type must be either 'app' or 'lib'." ⋄ 𝕊 𝕩} 𝕩
   •Out "Licence:"
   licence ← read.LineNoBlank 𝕩
-  dependencies ← ⟨⟩
-  ⟨name,description,author,version,type,licence,dependencies⟩
+  dependencies ← ""
+  ⟨name,description,project,author,email,version,type,licence,dependencies⟩
 }
-# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), author (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of lists of strings (index, Frazzle)).
+# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), project website (string), author (string), email (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of lists of strings (index, Frazzle)).
 # TODO: Implement dependency versioning like in Python (e.g. "numpy==1.1.14")
 # TODO: Type checking
 GenConfig ⇐ {
@@ -41,7 +45,11 @@ GenConfig ⇐ {
   configHeaders •HashMap 𝕩
 }
 ReadConfig ⇐ { 𝕩 }
-WriteConfig ⇐ { 𝕨 •file.Bytes 𝕩 } # TODO: input checking
+WriteConfig ⇐ {
+  # TODO: how to write dependencies?  need to convert list to config string format
+  config ← <∘∾˘{𝕨∾"→"∾𝕩}˝˘⍉ (𝕩.Keys @) ≍ 𝕩.Values @
+  𝕨 •file.Lines config
+} # TODO: input checking
 
 New ⇐ {
   (1=≠𝕩) err._Assert_ msg.use.new
