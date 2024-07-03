@@ -3,59 +3,11 @@ read ← •Import "read.bqn"
 err ← •Import "err.bqn"
 msg ← •Import "msg.bqn"
 str ← •Import "str.bqn"
+config ← •Import "config.bqn"
 
 cmdSet ⇐ ⟨"new","init","add","remove","search","help"⟩ # Allowed commands
 cmdHelpMap ← cmdSet •HashMap ⟨msg.help.new,msg.help.init,msg.help.add,msg.help.remove,msg.help.search,msg.help.help⟩ # Allowed commands with their corresponding help messages
 frazIndex ← "get.frazzl.es" # Default Frazzle index
-
-configHeaders ← ⟨"name","description","website","author","email","version","type","licence","dependencies"⟩
-InputConfig ← {
-  •Out "Frazzle name:"
-  name ← read.LineNoBlank 𝕩
-  •Out "Description:"
-  description ← read.LineNoBlank 𝕩
-  •Out "Project website:"
-  project ← read.LineNoBlank 𝕩
-  •Out "Author:"
-  author ← read.LineNoBlank 𝕩
-  •Out "Email address:"
-  email ← read.LineNoBlank 𝕩
-  •Out "Version number:"
-  version ← read.LineNoBlank 𝕩
-  •Out "Frazzle type ('app' or 'lib'):"
-  type ← {l←read.LineNoBlank 𝕩 ⋄ (l≡"app")∨(l≡"lib") ? l ; •Out "Frazzle type must be either 'app' or 'lib'." ⋄ 𝕊 𝕩} 𝕩
-  •Out "Licence:"
-  licence ← read.LineNoBlank 𝕩
-  dependencies ← ""
-  ⟨name,description,project,author,email,version,type,licence,dependencies⟩
-}
-# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), project website (string), author (string), email (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of lists of strings (index, Frazzle)).
-# TODO: Implement dependency versioning like in Python (e.g. "numpy==1.1.14")
-# TODO: Type checking
-GenConfig ⇐ {
-  n←≠configHeaders
-  ("GenConfig requires a list of length "∾(•Fmt n)∾".")!n=≠𝕩
-  configHeaders •HashMap 𝕩
-}
-ReadConfig ⇐ {
-  config ← •file.Lines 𝕩
-  config '→'⊸str.Cut¨↩
-  keys ← ⥊⊑¨∘‿1⥊'→'⊸str.Split˝˘∘‿1⥊config
-  values ← ⥊(⊑⌽)¨∘‿1⥊'→'⊸str.Split˝˘∘‿1⥊config
-  (∾´"Keys do not match required config headers.
-  Your keys:"∾str.tab∾str.tab∾(•Fmt keys)∾"
-  Required keys:"∾str.tab∾(•Fmt configHeaders))!configHeaders≡keys
-   "Config is missing values (or you have given a value which is the same as the key."!0=+´≡˝˘¯1↓⍉keys≍values
-  {"dependencies"≡⊑⌽values ? values↩(¯1↓values)∾⟨⟨⟩⟩ ; @} # If dependencies not given (which ReadConfig processes as having the value "dependencies", set dependencies to be ⟨⟩ # TODO: parse dependencies instead of @
-  out ← keys •Hashmap values
-  "Frazzle must be of type 'app' or 'lib'."!0≠≠(out.Get "type") str.SearchList ⟨"app","lib"⟩
-  out
-}
-WriteConfig ⇐ {
-  # TODO: how to write dependencies?  need to convert list to config string format
-  config ← <∘∾˘{𝕨∾"→"∾𝕩}˝˘⍉ (𝕩.Keys @) ≍ 𝕩.Values @
-  𝕨 •file.Lines config
-} # TODO: input checking
 
 New ⇐ {
   (1=≠𝕩) err._Assert_ msg.use.new
@@ -63,7 +15,7 @@ New ⇐ {
   (¬•file.Exists dir) err._Assert_ ("Directory "∾dir∾" already exists.")
   •file.CreateDir dir
   frazFile ← dir •file.At ".frazzle"
-  frazFile WriteConfig GenConfig InputConfig ""
+  frazFile config.Write config.Generate config.Input ""
   •Out "New Frazzle created in "∾dir∾"."
 }
 
@@ -71,7 +23,7 @@ Init ⇐ {
   (0=≠𝕩) err._Assert_ "fraz init does not accept arguments.  Did you mean 'fraz new <dir>'?"
   frazFile ← •wdpath •file.At ".frazzle"
   (¬•file.Exists frazFile) err._Assert_ "This directory is already a Frazzle."
-  WriteConfig frazFile
+  config.Write frazFile
   •Out "Frazzle initialised in "∾•wdpath
 }
 
