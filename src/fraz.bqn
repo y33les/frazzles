@@ -11,18 +11,16 @@ frazIndex ← "get.frazzl.es" # Default Frazzle index
 
 New ⇐ {
   (1=≠𝕩) err._Assert_ msg.use.new
-  •Out ⊑𝕩
-  name ← ⊑𝕩
-  dir ← •wdpath •file.At name
+  dir ← •wdpath •file.At ⊑𝕩
   (¬•file.Exists dir) err._Assert_ ("Directory "∾dir∾" already exists.")
   •file.CreateDir dir
-  •file.CreateDir dir⊸•file.At¨ "src"‿"lib"‿"test"
-  "<placeholder>"⊸•file.Chars˜¨ dir⊸•file.At¨ "LICENSE"‿"README.md"
-  (dir •file.At "src" •file.At name∾".bqn") •file.Lines ⟨"Hello ⇐ {","  •Out ∾´""Hello, ""∾𝕩∾""!""","}"⟩
-  (dir •file.At "main.bqn") •file.Lines ⟨∾´name∾" ← •Import ""src/"∾name∾".bqn""","",∾´name∾".Hello ""world"""⟩
-  (dir •file.At "test" •file.At "all.bqn") •file.Chars "•Out ""Hello, world!"""
-  frazFile ← dir •file.At ".frazzle"
-  frazFile config.Write config.Generate config.Input ""
+  (dir •file.At ".frazzle") config.Write conf←config.Generate config.Input ""
+  •file.CreateDir¨ dir⊸•file.At¨ "src"‿"lib"‿"test"
+  (dir •file.At "LICENSE") •file.Lines ⟨∾´"<placeholder: "∾(conf.Get "license")∾">"⟩
+  (dir •file.At "README.md") •file.Lines ⟨∾´"# "∾conf.Get "name","",conf.Get "description"⟩
+  (dir •file.At "src" •file.At (conf.Get "name")∾".bqn") •file.Lines ⟨"Hello ⇐ {","  •Out ∾´""Hello, ""∾𝕩∾""!""","}"⟩
+  (dir •file.At "main.bqn") •file.Lines ⟨∾´(conf.Get "name")∾" ← •Import ""src/"∾(conf.Get "name")∾".bqn""","",∾´(conf.Get "name")∾".Hello ""world"""⟩
+  (dir •file.At "test" •file.At "all.bqn") •file.Lines ⟨"•Out ""Hello, world!"""⟩
   •Out "New Frazzle created in "∾dir∾"."
 }
 
