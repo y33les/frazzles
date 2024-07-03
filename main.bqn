@@ -1,8 +1,8 @@
-fraz ← •Import "fraz.bqn"
-msg ← •Import "msg.bqn"
-err ← •Import "err.bqn"
+fraz ← •Import "src/fraz.bqn"
+msg ← •Import "src/msg.bqn"
+err ← •Import "src/err.bqn"
 
-cmdFnMap ← fraz.cmdSet •HashMap ⟨fraz.new,fraz.init,fraz.add,fraz.remove,fraz.search,fraz.help⟩ # Allowed commands with their corresponding functions
+cmdFnMap ← fraz.cmdSet •HashMap ⟨fraz.new,fraz.add,fraz.remove,fraz.search,fraz.help⟩ # Allowed commands with their corresponding functions
 
 # Process arguments: fraz <cmd> <args>
 args ← •args

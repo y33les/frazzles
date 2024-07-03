@@ -5,26 +5,21 @@ msg ← •Import "msg.bqn"
 str ← •Import "str.bqn"
 config ← •Import "config.bqn"
 
-cmdSet ⇐ ⟨"new","init","add","remove","search","help"⟩ # Allowed commands
-cmdHelpMap ← cmdSet •HashMap ⟨msg.help.new,msg.help.init,msg.help.add,msg.help.remove,msg.help.search,msg.help.help⟩ # Allowed commands with their corresponding help messages
+cmdSet ⇐ ⟨"new","add","remove","search","help"⟩ # Allowed commands
+cmdHelpMap ← cmdSet •HashMap ⟨msg.help.new,msg.help.add,msg.help.remove,msg.help.search,msg.help.help⟩ # Allowed commands with their corresponding help messages
 frazIndex ← "get.frazzl.es" # Default Frazzle index
 
 New ⇐ {
   (1=≠𝕩) err._Assert_ msg.use.new
   dir ← •wdpath •file.At ⊑𝕩
   (¬•file.Exists dir) err._Assert_ ("Directory "∾dir∾" already exists.")
-  •file.CreateDir dir
+  •file.CreateDir¨ dir
+  •file.CreateDir •wdpath⊸•file.At¨ "src"‿"lib"‿"test"
+  "<placeholder>"⊸•file.Chars˜¨ "LICENSE"‿"README.md"
+  "main.bqn" •file.Chars "•Out ""Hello, world!"""
   frazFile ← dir •file.At ".frazzle"
   frazFile config.Write config.Generate config.Input ""
   •Out "New Frazzle created in "∾dir∾"."
-}
-
-Init ⇐ {
-  (0=≠𝕩) err._Assert_ "fraz init does not accept arguments.  Did you mean 'fraz new <dir>'?"
-  frazFile ← •wdpath •file.At ".frazzle"
-  (¬•file.Exists frazFile) err._Assert_ "This directory is already a Frazzle."
-  config.Write frazFile
-  •Out "Frazzle initialised in "∾•wdpath
 }
 
 Add ⇐ {
@@ -39,7 +34,7 @@ Add ⇐ {
     •Show url
     (226=response.code) err._Assert_ ("Failed to fetch Frazzle index with code "∾(•Fmt response.code)∾" ("∾url∾").") # 226 is FTP OK
     libdir ← •wdpath •file.At "lib"
-    outfile ← libdir •file.At 𝕩
+    outfile ← libdir •file.At "._frz_"∾𝕩
     •Show outfile
     outfile •file.Bytes response.content
     •SH "tar"‿"xJf"‿outfile # TODO: A pure BQN (or even an •FFI) solution would be nicer here at some point
@@ -77,3 +72,8 @@ Help ⇐ {
   (∊⟜cmdSet⌾<⊑𝕩) err._Assert_ ("Allowed commands are: "∾{𝕨∾", "∾𝕩}´cmdSet)
   •Out cmdHelpMap.Get ⊑𝕩 
 }
+
+# TODO: Test
+# TODO: Build
+# TODO: Run (not for libs) (run folder and run .frz file)
+# TODO: Publish?

@@ -3,6 +3,8 @@ str ← •Import "str.bqn"
 
 headers ⇐ ⟨"name","description","website","author","email","version","type","license","dependencies"⟩
 
+# TODO: input sanitising, e.g. @ in email, no spaces in frazzle name
+
 Input ⇐ {
   •Out "Frazzle name:"
   name ← r.LineNoBlank 𝕩
