@@ -39,8 +39,11 @@ Add ⇐ {
     outfile ← libdir •file.At "._frz_"∾𝕩
     •Show outfile
     outfile •file.Bytes response.content
-    •SH "tar"‿"xJf"‿outfile # TODO: A pure BQN (or even an •FFI) solution would be nicer here at some point
+    •file.CreateDir outdir ← •wdpath •file.At "lib" •file.At 𝕩
+    •SH "tar"‿"-xJf"‿outfile‿"-C"‿outdir # TODO: A pure BQN (or even an •FFI) solution would be nicer here at some point
     •file.Remove outfile
+    # TODO: make it work for multiple adds at once (think this is a conflict with Search)
+    # TODO: add to dependencies and check against existing ones for duplicates
   }
   Download¨ search # TODO: test!!
 }
