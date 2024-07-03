@@ -39,7 +39,17 @@ GenConfig ⇐ {
 }
 ReadConfig ⇐ {
   config ← •file.Lines 𝕩
-  •Show config
+  config '→'⊸str.Cut¨↩
+  keys ← ⥊⊑¨∘‿1⥊'→'⊸str.Split˝˘∘‿1⥊config
+  values ← ⥊(⊑⌽)¨∘‿1⥊'→'⊸str.Split˝˘∘‿1⥊config
+  (∾´"Keys do not match required config headers.
+  Your keys:"∾str.tab∾str.tab∾(•Fmt keys)∾"
+  Required keys:"∾str.tab∾(•Fmt configHeaders))!configHeaders≡keys
+   "Config is missing values (or you have given a value which is the same as the key."!0=+´≡˝˘¯1↓⍉keys≍values
+  {"dependencies"≡⊑⌽values ? values↩(¯1↓values)∾⟨⟨⟩⟩ ; @} # If dependencies not given (which ReadConfig processes as having the value "dependencies", set dependencies to be ⟨⟩ # TODO: parse dependencies instead of @
+  out ← keys •Hashmap values
+  "Frazzle must be of type 'app' or 'lib'."!0≠≠(out.Get "type") str.SearchList ⟨"app","lib"⟩
+  out
 }
 WriteConfig ⇐ {
   # TODO: how to write dependencies?  need to convert list to config string format
