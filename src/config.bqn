@@ -1,7 +1,7 @@
 r ← •Import "read.bqn"
 str ← •Import "str.bqn"
 
-headers ⇐ ⟨"name","description","website","author","email","version","type","licence","dependencies"⟩
+headers ⇐ ⟨"name","description","website","author","email","version","type","license","dependencies"⟩
 Input ⇐ {
   •Out "Frazzle name:"
   name ← r.LineNoBlank 𝕩
@@ -17,12 +17,12 @@ Input ⇐ {
   version ← r.LineNoBlank 𝕩
   •Out "Frazzle type ('app' or 'lib'):"
   type ← {l←r.LineNoBlank 𝕩 ⋄ (l≡"app")∨(l≡"lib") ? l ; •Out "Frazzle type must be either 'app' or 'lib'." ⋄ 𝕊 𝕩} 𝕩
-  •Out "Licence:"
-  licence ← r.LineNoBlank 𝕩
+  •Out "license:"
+  license ← r.LineNoBlank 𝕩
   dependencies ← ""
-  ⟨name,description,project,author,email,version,type,licence,dependencies⟩
+  ⟨name,description,project,author,email,version,type,license,dependencies⟩
 }
-# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), project website (string), author (string), email (string), version (string), type (string: "app" or "lib") licence (string) and dependencies (list of lists of strings (index, Frazzle)).
+# Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), project website (string), author (string), email (string), version (string), type (string: "app" or "lib") license (string) and dependencies (list of lists of strings (index, Frazzle)).
 # TODO: Implement dependency versioning like in Python (e.g. "numpy==1.1.14")
 # TODO: Type checking
 Generate ⇐ {
