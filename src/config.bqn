@@ -2,6 +2,7 @@ r ← •Import "read.bqn"
 str ← •Import "str.bqn"
 
 headers ⇐ ⟨"name","description","website","author","email","version","type","license","dependencies"⟩
+
 Input ⇐ {
   •Out "Frazzle name:"
   name ← r.LineNoBlank 𝕩
@@ -22,6 +23,7 @@ Input ⇐ {
   dependencies ← ""
   ⟨name,description,project,author,email,version,type,license,dependencies⟩
 }
+
 # Generate a config HashMap where 𝕩 is a list of corresponding to the Frazzle name (string), description (string), project website (string), author (string), email (string), version (string), type (string: "app" or "lib") license (string) and dependencies (list of lists of strings (index, Frazzle)).
 # TODO: Implement dependency versioning like in Python (e.g. "numpy==1.1.14")
 # TODO: Type checking
@@ -30,6 +32,7 @@ Generate ⇐ {
   ("Generate requires a list of length "∾(•Fmt n)∾".")!n=≠𝕩
   headers •HashMap 𝕩
 }
+
 Read ⇐ {
   config ← •file.Lines 𝕩
   config '→'⊸str.Cut¨↩
@@ -44,6 +47,7 @@ Read ⇐ {
   "Frazzle must be of type 'app' or 'lib'."!0≠≠(out.Get "type") str.SearchList ⟨"app","lib"⟩
   out
 }
+
 Write ⇐ {
   # TODO: how to write dependencies?  need to convert list to config string format
   config ← <∘∾˘{𝕨∾"→"∾𝕩}˝˘⍉ (𝕩.Keys @) ≍ 𝕩.Values @
