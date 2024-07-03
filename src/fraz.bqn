@@ -4,16 +4,9 @@ err ← •Import "err.bqn"
 msg ← •Import "msg.bqn"
 str ← •Import "str.bqn"
 
-cmdSet ← ⟨"new","init","add","remove","search","help"⟩ # Allowed commands
+cmdSet ⇐ ⟨"new","init","add","remove","search","help"⟩ # Allowed commands
 cmdHelpMap ← cmdSet •HashMap ⟨msg.help.new,msg.help.init,msg.help.add,msg.help.remove,msg.help.search,msg.help.help⟩ # Allowed commands with their corresponding help messages
 frazIndex ← "get.frazzl.es" # Default Frazzle index
-
-# Process arguments: fraz <cmd> <args>
-args ← •args
-{ 0=≠𝕩 ? •Out msg.help.fraz ⋄ •Exit 0 ; @ }args # Display help message if no arguments provided
-cmd ← ⊑args
-(∊⟜cmdSet⌾<cmd) err._Assert_ ("Allowed commands are: "∾{𝕨∾", "∾𝕩}´cmdSet) # Fail if cmd is unknown
-args 1⊸↓↩
 
 configHeaders ← ⟨"name","description","website","author","email","version","type","licence","dependencies"⟩
 InputConfig ← {
@@ -44,7 +37,10 @@ GenConfig ⇐ {
   ("GenConfig requires a list of length "∾(•Fmt n)∾".")!n=≠𝕩
   configHeaders •HashMap 𝕩
 }
-ReadConfig ⇐ { 𝕩 }
+ReadConfig ⇐ {
+  config ← •file.Lines 𝕩
+  •Show config
+}
 WriteConfig ⇐ {
   # TODO: how to write dependencies?  need to convert list to config string format
   config ← <∘∾˘{𝕨∾"→"∾𝕩}˝˘⍉ (𝕩.Keys @) ≍ 𝕩.Values @
@@ -119,8 +115,3 @@ Help ⇐ {
   (∊⟜cmdSet⌾<⊑𝕩) err._Assert_ ("Allowed commands are: "∾{𝕨∾", "∾𝕩}´cmdSet)
   •Out cmdHelpMap.Get ⊑𝕩 
 }
-
-cmdFnMap ← cmdSet •HashMap ⟨new,init,add,remove,search,help⟩ # Allowed commands with their corresponding functions
-
-# Run it!
-args{𝕏𝕨}cmdFnMap.Get cmd
